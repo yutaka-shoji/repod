@@ -22,7 +22,7 @@ console = Console()
 @click.option(
     "-i",
     "--ignore-file",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    type=click.Path(exists=False, dir_okay=False, path_type=Path),
     default=".rpdignore",
     help="Path to ignore file (default: .rpdignore)",
 )
