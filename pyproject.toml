@@ -1,6 +1,6 @@
 [project]
 name = "repod-cli"
-version = "0.0.1"
+version = "0.0.2"
 description = "REPOsitory Dumper"
 readme = "README.md"
 authors = [
