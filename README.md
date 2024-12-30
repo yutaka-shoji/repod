@@ -17,7 +17,7 @@ This tool was created to make it easier for LLMs to read the contents of an enti
 Requires Python 3.10 or later.
 
 ```bash
-pip install repod
+pip install repod-cli
 ```
 
 ## Usage
@@ -84,7 +84,7 @@ node_modules/*
 
 ### Example Output
 
-The generated markdown file from this repo: [repod.md](./repod.md) 
+The generated markdown file from this repo: [repod.md](https://github.com/yutaka-shoji/repod/blob/main/repod.md) 
 
 ## Requirements
 

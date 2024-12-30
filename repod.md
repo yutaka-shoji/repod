@@ -32,8 +32,8 @@
 ```
 [project]
 name = "repod"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.1"
+description = "REPOsitory Dumper"
 readme = "README.md"
 authors = [
     { name = "Shoji, Yutaka", email = "ytk.shoji@gmail.com" }
@@ -59,8 +59,11 @@ build-backend = "hatchling.build"
 ```markdown
 # repod
 
-REPository Dumper:  
+REPOsitory Dumper:  
 A command-line tool to generate a Markdown document containing the entire contents of a repository, including directory structure and file contents.
+
+## Motivation
+This tool was created to make it easier for LLMs to read the contents of an entire repository by converting an entire repository into a single markdown file.
 
 ## Features
 
@@ -80,6 +83,10 @@ pip install repod
 
 Basic usage:
 ```bash
+repod # default to current dir
+```
+or,
+```bash
 repod /path/to/repository
 ```
 
@@ -88,76 +95,59 @@ This will create a `repod.md` file containing the repository contents.
 ### Options
 
 ```bash
-repod [OPTIONS] REPO_PATH
+Usage: repod [OPTIONS] [REPO_PATH]
+
+  Repod: Dump repository contents to single markdown file.
 
 Options:
-  -o, --output PATH      Output file path [default: repod.md]
-  -i, --ignore-file PATH Path to ignore file [default: .rpdignore]
-  -p, --preamble PATH   Path to preamble file
-  --no-tree            Disable tree structure in output
-  --help              Show this message and exit
+  -o, --output FILE       Output file path (default: repod.md)
+  -i, --ignore-file FILE  Path to ignore file (default: .rpdignore)
+  -p, --preamble FILE     Path to preamble file
+  --no-tree               Disable tree structure in output
+  --help                  Show this message and exit.
 ```
 
 ### Ignore File
 
-You can specify files and directories to ignore using a `.rpdignore` file. The file uses glob patterns, similar to `.gitignore`:
-
-```plaintext
-# Example .rpdignore
+Default ignore patterns:  
+```gitignore
+.rpdignore
+repod.md
+.git/*
+.gitignore
+.github/*
+.tox/*
 *.pyc
-__pycache__/
-.git/
-.env
+__pycache__/*
+.mypy_cache/*
+.ruff_cache/*
+*.whl
+*.tar
+*.tar.gz
+*.env*
+*.png
+*.jpeg
+*.jpg
+*bin/*
+*.lock
+.venv/*
+```
+
+
+You can specify files and directories to additionally ignore using a `.rpdignore` file. The file uses glob patterns, similar to `.gitignore`:
+
+```gitignore
+# Example .rpdignore
+node_modules/*
 ```
 
 ### Example Output
 
-The generated markdown file will have the following structure:
-
-```markdown
-# Repository Content Dump
-
-## Repository Structure
-
-[Directory Tree]
-
-## File Contents
-
-### path/to/file1.py
-
-```python
-# File contents with syntax highlighting
-```
-
-### path/to/file2.md
-
-```markdown
-# File contents
-```
-```
-
-## Development
-
-1. Clone the repository:
-```bash
-git clone https://github.com/username/repod.git
-cd repod
-```
-
-2. Create a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -e ".[dev]"
-```
+The generated markdown file from this repo: [repod.md](https://github.com/yutaka-shoji/repod/blob/main/repod.md) 
 
 ## Requirements
 
-- Python >=3.12
+- Python >=3.10
 - click >=8.1.8
 - rich >=13.9.4
 - treelib >=1.7.0
@@ -165,10 +155,6 @@ pip install -e ".[dev]"
 ## License
 
 MIT License
-
-## Author
-
-Shoji, Yutaka (ytk.shoji@gmail.com)
 
 ```
 
@@ -255,9 +241,35 @@ class RepositoryDumper:
         ".ps1": "powershell",
     }
 
+    # default ignore patterns
+    DEFAULT_IGNORE_PATTERNS = [
+        ".rpdignore",
+        "repod.md",
+        ".git/*",
+        ".gitignore",
+        ".github/*",
+        ".tox/*",
+        "*.pyc",
+        "__pycache__/*",
+        ".mypy_cache/*",
+        ".ruff_cache/*",
+        "*.whl",
+        "*.tar",
+        "*.tar.gz",
+        "*.env*",
+        "*.png",
+        "*.jpeg",
+        "*.jpg",
+        "*bin/*",
+        "*.lock",
+        ".venv/*",
+    ]
+
     def __init__(self, config: DumperConfig):
         self.config = config
-        self.ignore_patterns = self._load_ignore_patterns()
+        self.ignore_patterns = (
+            self.DEFAULT_IGNORE_PATTERNS + self._load_ignore_patterns()
+        )
 
     def _get_file_language(self, file_path: Path) -> str:
         """Get the language for a given file based on its extension."""
@@ -410,14 +422,14 @@ console = Console()
     "--output",
     type=click.Path(dir_okay=False, path_type=Path),
     default="repod.md",
-    help="Output file path",
+    help="Output file path (default: repod.md)",
 )
 @click.option(
     "-i",
     "--ignore-file",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=".rpdignore",
-    help="Path to ignore file (.rpdignore)",
+    help="Path to ignore file (default: .rpdignore)",
 )
 @click.option(
     "-p",
