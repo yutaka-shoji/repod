@@ -10,9 +10,13 @@
 ```
 
 ├── .git/
+├── .github/
 ├── .python-version
 ├── .venv/
+├── LICENSE
 ├── README.md
+├── dist/
+│   └── .gitignore
 ├── pyproject.toml
 └── src/
     └── repod/
@@ -27,12 +31,39 @@
 
 ## File Contents
 
+### LICENSE
+
+```
+MIT License
+
+Copyright (c) 2024 Shoji, Yutaka
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
 ### pyproject.toml
 
 ```
 [project]
-name = "repod"
-version = "0.0.1"
+name = "repod-cli"
+version = "0.0.3"
 description = "REPOsitory Dumper"
 readme = "README.md"
 authors = [
@@ -51,6 +82,9 @@ repod = "repod.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/repod"]
 
 ```
 
@@ -76,7 +110,7 @@ This tool was created to make it easier for LLMs to read the contents of an enti
 Requires Python 3.10 or later.
 
 ```bash
-pip install repod
+pip install repod-cli
 ```
 
 ## Usage
@@ -163,6 +197,12 @@ MIT License
 ```
 3.10
 
+```
+
+### dist/.gitignore
+
+```
+*
 ```
 
 ### src/repod/__init__.py
@@ -427,7 +467,7 @@ console = Console()
 @click.option(
     "-i",
     "--ignore-file",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    type=click.Path(exists=False, dir_okay=False, path_type=Path),
     default=".rpdignore",
     help="Path to ignore file (default: .rpdignore)",
 )
