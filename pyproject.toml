@@ -1,0 +1,21 @@
+[project]
+name = "repod"
+version = "0.0.1"
+description = "REPOsitory Dumper"
+readme = "README.md"
+authors = [
+    { name = "Shoji, Yutaka", email = "ytk.shoji@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.8",
+    "rich>=13.9.4",
+    "treelib>=1.7.0",
+]
+
+[project.scripts]
+repod = "repod.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,23 @@
+# below are default ignore files
+# .rpdignore
+# repod.md
+# .git/*
+# .gitignore
+# .github/*
+# .tox/*
+# *.pyc
+# __pycache__/*
+# .mypy_cache/*
+# .ruff_cache/*
+# *.whl
+# *.tar
+# *.tar.gz
+# *.env*
+# *.png
+# *.jpeg
+# *.jpg
+# *bin/*
+# *.lock
+# .venv/*
+
+node_modules/*
