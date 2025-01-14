@@ -1,5 +1,6 @@
 # repod
 
+[![PyPI Downloads](https://static.pepy.tech/badge/repod-cli)](https://pepy.tech/projects/repod-cli)
 REPOsitory Dumper:  
 A command-line tool to generate a Markdown document containing the entire contents of a repository, including directory structure and file contents.
 
