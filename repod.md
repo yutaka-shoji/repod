@@ -11,6 +11,8 @@
 
 ├── .git/
 ├── .github/
+│   └── workflows/
+│       └── release.yml
 ├── .python-version
 ├── LICENSE
 ├── README.md
@@ -149,26 +151,53 @@ Options:
 
 Default ignore patterns:  
 ```gitignore
+--- Project-specific files ---
 .rpdignore
 repod.md
+
+--- Git-related files ---
 .git/*
 .gitignore
-.github/*
+
+--- OS-specific metadata ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+--- IDE/editor settings ---
+.idea/*
+.vscode/*
+.project
+.classpath
+.settings/*
+
+--- Python-related caches/build artifacts ---
 .tox/*
 *.pyc
 __pycache__/*
 .mypy_cache/*
 .ruff_cache/*
 *.whl
+.env*
+.venv/*
+
+--- Archives ---
 *.tar
 *.tar.gz
-*.env*
+
+--- Media files (images) ---
 *.png
 *.jpeg
 *.jpg
+
+--- Log files, binaries, lock files ---
+*.log
 *bin/*
 *.lock
-.venv/*
+
+--- Node.js dependencies ---
+*/node_modules/*
+
 ```
 
 
@@ -193,6 +222,43 @@ The generated markdown file from this repo: [repod.md](https://github.com/yutaka
 ## License
 
 MIT License
+
+```
+
+### .github\workflows\release.yml
+
+```yaml
+name: "Publish"
+
+on:
+  release:
+    types: ["published"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: "Build and publish to PyPI"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build
+        run: uv build
+
+      - name: Publish
+        run: uv publish
 
 ```
 
@@ -350,7 +416,6 @@ class RepositoryDumper:
     # --- Git-related files ---
     ".git/*",
     ".gitignore",
-    ".github/*",
 
     # --- OS-specific metadata ---
     ".DS_Store",
