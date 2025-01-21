@@ -52,26 +52,53 @@ Options:
 
 Default ignore patterns:  
 ```gitignore
+--- Project-specific files ---
 .rpdignore
 repod.md
+
+--- Git-related files ---
 .git/*
 .gitignore
-.github/*
+
+--- OS-specific metadata ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+--- IDE/editor settings ---
+.idea/*
+.vscode/*
+.project
+.classpath
+.settings/*
+
+--- Python-related caches/build artifacts ---
 .tox/*
 *.pyc
 __pycache__/*
 .mypy_cache/*
 .ruff_cache/*
 *.whl
+.env*
+.venv/*
+
+--- Archives ---
 *.tar
 *.tar.gz
-*.env*
+
+--- Media files (images) ---
 *.png
 *.jpeg
 *.jpg
+
+--- Log files, binaries, lock files ---
+*.log
 *bin/*
 *.lock
-.venv/*
+
+--- Node.js dependencies ---
+*/node_modules/*
+
 ```
 
 
