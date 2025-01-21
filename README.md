@@ -45,6 +45,7 @@ Options:
   -i, --ignore-file FILE  Path to ignore file (default: .rpdignore)
   -p, --preamble FILE     Path to preamble file
   --no-tree               Disable tree structure in output
+  --encoding TEXT         File encoding (default: utf-8)
   --help                  Show this message and exit.
 ```
 
