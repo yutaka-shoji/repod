@@ -73,7 +73,6 @@ class RepositoryDumper:
     # --- Git-related files ---
     ".git/*",
     ".gitignore",
-    ".github/*",
 
     # --- OS-specific metadata ---
     ".DS_Store",
