@@ -66,26 +66,53 @@ class RepositoryDumper:
 
     # default ignore patterns
     DEFAULT_IGNORE_PATTERNS = [
-        ".rpdignore",
-        "repod.md",
-        ".git/*",
-        ".gitignore",
-        ".github/*",
-        ".tox/*",
-        "*.pyc",
-        "__pycache__/*",
-        ".mypy_cache/*",
-        ".ruff_cache/*",
-        "*.whl",
-        "*.tar",
-        "*.tar.gz",
-        "*.env*",
-        "*.png",
-        "*.jpeg",
-        "*.jpg",
-        "*bin/*",
-        "*.lock",
-        ".venv/*",
+    # --- Project-specific files ---
+    ".rpdignore",
+    "repod.md",
+
+    # --- Git-related files ---
+    ".git/*",
+    ".gitignore",
+    ".github/*",
+
+    # --- OS-specific metadata ---
+    ".DS_Store",
+    "Thumbs.db",
+    "Desktop.ini",
+
+    # --- IDE/editor settings ---
+    ".idea/*",
+    ".vscode/*",
+    ".project",
+    ".classpath",
+    ".settings/*",
+
+    # --- Python-related caches/build artifacts ---
+    ".tox/*",
+    "*.pyc",
+    "__pycache__/*",
+    ".mypy_cache/*",
+    ".ruff_cache/*",
+    "*.whl",
+    ".env*",   # May contain sensitive information
+    ".venv/*", # Python virtual environment
+
+    # --- Archives ---
+    "*.tar",
+    "*.tar.gz",
+
+    # --- Media files (images) ---
+    "*.png",
+    "*.jpeg",
+    "*.jpg",
+
+    # --- Log files, binaries, lock files ---
+    "*.log",
+    "*bin/*",
+    "*.lock",
+
+    # --- Node.js dependencies ---
+    "*/node_modules/*",
     ]
 
     def __init__(self, config: DumperConfig):
