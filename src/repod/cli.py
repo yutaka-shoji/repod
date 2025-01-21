@@ -33,12 +33,19 @@ console = Console()
     help="Path to preamble file",
 )
 @click.option("--no-tree", is_flag=True, help="Disable tree structure in output")
+@click.option(
+    "--encoding",
+    type=str,
+    default="utf-8",
+    help="File encoding for reading repository files (default: utf-8)",
+)
 def main(
     repo_path: Path,
     output: Path,
     ignore_file: Path,
     preamble: Path,
     no_tree: bool,
+    encoding: str,
 ) -> None:
     """Repod: Dump repository contents to single markdown file."""
     try:
@@ -48,6 +55,7 @@ def main(
             ignore_file=ignore_file,
             preamble_file=preamble,
             include_tree=not no_tree,
+            encoding=encoding,
         )
 
         dumper = RepositoryDumper(config)

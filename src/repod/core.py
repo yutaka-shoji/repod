@@ -20,6 +20,7 @@ class DumperConfig:
     ignore_file: Optional[Path] = None
     preamble_file: Optional[Path] = None
     include_tree: bool = True
+    encoding: str = "utf-8" 
     default_preamble: str = """
     # Repository Content Dump
 
@@ -103,7 +104,7 @@ class RepositoryDumper:
             return []
 
         try:
-            with open(self.config.ignore_file, "r") as f:
+            with open(self.config.ignore_file, "r", encoding=self.config.encoding, errors="ignore") as f:
                 return [
                     line.strip()
                     for line in f
@@ -158,7 +159,7 @@ class RepositoryDumper:
         preamble = self.config.default_preamble
         if self.config.preamble_file:
             try:
-                with open(self.config.preamble_file, "r") as pf:
+                with open(self.config.preamble_file, "r", encoding=self.config.encoding, errors="ignore") as pf:
                     preamble = pf.read().strip()
             except Exception as e:
                 logger.error(f"Error reading preamble file: {e}")
@@ -179,7 +180,7 @@ class RepositoryDumper:
             if self._should_ignore(str(relative_path)):
                 return
 
-            with open(file_path, "r", errors="ignore") as f:
+            with open(file_path, "r", encoding=self.config.encoding, errors="ignore") as f:
                 content = f.read()
                 lang = self._get_file_language(file_path)
                 output_file.write(f"### {relative_path}\n\n")
