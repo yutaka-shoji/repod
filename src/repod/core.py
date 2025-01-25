@@ -20,6 +20,7 @@ class DumperConfig:
     ignore_file: Optional[Path] = None
     preamble_file: Optional[Path] = None
     include_tree: bool = True
+    encoding: str = "utf-8" 
     default_preamble: str = """
     # Repository Content Dump
 
@@ -65,26 +66,52 @@ class RepositoryDumper:
 
     # default ignore patterns
     DEFAULT_IGNORE_PATTERNS = [
-        ".rpdignore",
-        "repod.md",
-        ".git/*",
-        ".gitignore",
-        ".github/*",
-        ".tox/*",
-        "*.pyc",
-        "__pycache__/*",
-        ".mypy_cache/*",
-        ".ruff_cache/*",
-        "*.whl",
-        "*.tar",
-        "*.tar.gz",
-        "*.env*",
-        "*.png",
-        "*.jpeg",
-        "*.jpg",
-        "*bin/*",
-        "*.lock",
-        ".venv/*",
+    # --- Project-specific files ---
+    ".rpdignore",
+    "repod.md",
+
+    # --- Git-related files ---
+    ".git/*",
+    ".gitignore",
+
+    # --- OS-specific metadata ---
+    ".DS_Store",
+    "Thumbs.db",
+    "Desktop.ini",
+
+    # --- IDE/editor settings ---
+    ".idea/*",
+    ".vscode/*",
+    ".project",
+    ".classpath",
+    ".settings/*",
+
+    # --- Python-related caches/build artifacts ---
+    ".tox/*",
+    "*.pyc",
+    "__pycache__/*",
+    ".mypy_cache/*",
+    ".ruff_cache/*",
+    "*.whl",
+    ".env*",   # May contain sensitive information
+    ".venv/*", # Python virtual environment
+
+    # --- Archives ---
+    "*.tar",
+    "*.tar.gz",
+
+    # --- Media files (images) ---
+    "*.png",
+    "*.jpeg",
+    "*.jpg",
+
+    # --- Log files, binaries, lock files ---
+    "*.log",
+    "*bin/*",
+    "*.lock",
+
+    # --- Node.js dependencies ---
+    "*/node_modules/*",
     ]
 
     def __init__(self, config: DumperConfig):
@@ -103,7 +130,7 @@ class RepositoryDumper:
             return []
 
         try:
-            with open(self.config.ignore_file, "r") as f:
+            with open(self.config.ignore_file, "r", encoding=self.config.encoding, errors="ignore") as f:
                 return [
                     line.strip()
                     for line in f
@@ -158,7 +185,7 @@ class RepositoryDumper:
         preamble = self.config.default_preamble
         if self.config.preamble_file:
             try:
-                with open(self.config.preamble_file, "r") as pf:
+                with open(self.config.preamble_file, "r", encoding=self.config.encoding, errors="ignore") as pf:
                     preamble = pf.read().strip()
             except Exception as e:
                 logger.error(f"Error reading preamble file: {e}")
@@ -179,7 +206,7 @@ class RepositoryDumper:
             if self._should_ignore(str(relative_path)):
                 return
 
-            with open(file_path, "r", errors="ignore") as f:
+            with open(file_path, "r", encoding=self.config.encoding, errors="ignore") as f:
                 content = f.read()
                 lang = self._get_file_language(file_path)
                 output_file.write(f"### {relative_path}\n\n")

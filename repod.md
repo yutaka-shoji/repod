@@ -11,12 +11,11 @@
 
 ├── .git/
 ├── .github/
+│   └── workflows/
+│       └── release.yml
 ├── .python-version
-├── .venv/
 ├── LICENSE
 ├── README.md
-├── dist/
-│   └── .gitignore
 ├── pyproject.toml
 └── src/
     └── repod/
@@ -30,6 +29,13 @@
 
 
 ## File Contents
+
+### .python-version
+
+```
+3.10
+
+```
 
 ### LICENSE
 
@@ -91,8 +97,8 @@ packages = ["src/repod"]
 ### README.md
 
 ```markdown
+[![PyPI Downloads](https://static.pepy.tech/badge/repod-cli)](https://pepy.tech/projects/repod-cli)
 # repod
-
 REPOsitory Dumper:  
 A command-line tool to generate a Markdown document containing the entire contents of a repository, including directory structure and file contents.
 
@@ -145,26 +151,53 @@ Options:
 
 Default ignore patterns:  
 ```gitignore
+--- Project-specific files ---
 .rpdignore
 repod.md
+
+--- Git-related files ---
 .git/*
 .gitignore
-.github/*
+
+--- OS-specific metadata ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+--- IDE/editor settings ---
+.idea/*
+.vscode/*
+.project
+.classpath
+.settings/*
+
+--- Python-related caches/build artifacts ---
 .tox/*
 *.pyc
 __pycache__/*
 .mypy_cache/*
 .ruff_cache/*
 *.whl
+.env*
+.venv/*
+
+--- Archives ---
 *.tar
 *.tar.gz
-*.env*
+
+--- Media files (images) ---
 *.png
 *.jpeg
 *.jpg
+
+--- Log files, binaries, lock files ---
+*.log
 *bin/*
 *.lock
-.venv/*
+
+--- Node.js dependencies ---
+*/node_modules/*
+
 ```
 
 
@@ -192,28 +225,120 @@ MIT License
 
 ```
 
-### .python-version
+### .github\workflows\release.yml
+
+```yaml
+name: "Publish"
+
+on:
+  release:
+    types: ["published"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: "Build and publish to PyPI"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build
+        run: uv build
+
+      - name: Publish
+        run: uv publish
 
 ```
-3.10
 
-```
-
-### dist/.gitignore
-
-```
-*
-```
-
-### src/repod/__init__.py
+### src\repod\cli.py
 
 ```python
-def hello() -> str:
-    return "Hello from repod!"
+import click
+from pathlib import Path
+from .core import DumperConfig, RepositoryDumper
+from rich.console import Console
+
+console = Console()
+
+
+@click.command()
+@click.argument(
+    "repo_path",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=".",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default="repod.md",
+    help="Output file path (default: repod.md)",
+)
+@click.option(
+    "-i",
+    "--ignore-file",
+    type=click.Path(exists=False, dir_okay=False, path_type=Path),
+    default=".rpdignore",
+    help="Path to ignore file (default: .rpdignore)",
+)
+@click.option(
+    "-p",
+    "--preamble",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Path to preamble file",
+)
+@click.option("--no-tree", is_flag=True, help="Disable tree structure in output")
+@click.option(
+    "--encoding",
+    type=str,
+    default="utf-8",
+    help="File encoding for reading repository files (default: utf-8)",
+)
+def main(
+    repo_path: Path,
+    output: Path,
+    ignore_file: Path,
+    preamble: Path,
+    no_tree: bool,
+    encoding: str,
+) -> None:
+    """Repod: Dump repository contents to single markdown file."""
+    try:
+        config = DumperConfig(
+            repo_path=repo_path,
+            output_path=output,
+            ignore_file=ignore_file,
+            preamble_file=preamble,
+            include_tree=not no_tree,
+            encoding=encoding,
+        )
+
+        dumper = RepositoryDumper(config)
+        dumper.dump()
+
+    except Exception as e:
+        console.print(f"[red]Error: {str(e)}[/red]")
+        raise click.Abort()
+
+
+if __name__ == "__main__":
+    main()
 
 ```
 
-### src/repod/core.py
+### src\repod\core.py
 
 ```python
 from dataclasses import dataclass
@@ -238,6 +363,7 @@ class DumperConfig:
     ignore_file: Optional[Path] = None
     preamble_file: Optional[Path] = None
     include_tree: bool = True
+    encoding: str = "utf-8" 
     default_preamble: str = """
     # Repository Content Dump
 
@@ -283,26 +409,52 @@ class RepositoryDumper:
 
     # default ignore patterns
     DEFAULT_IGNORE_PATTERNS = [
-        ".rpdignore",
-        "repod.md",
-        ".git/*",
-        ".gitignore",
-        ".github/*",
-        ".tox/*",
-        "*.pyc",
-        "__pycache__/*",
-        ".mypy_cache/*",
-        ".ruff_cache/*",
-        "*.whl",
-        "*.tar",
-        "*.tar.gz",
-        "*.env*",
-        "*.png",
-        "*.jpeg",
-        "*.jpg",
-        "*bin/*",
-        "*.lock",
-        ".venv/*",
+    # --- Project-specific files ---
+    ".rpdignore",
+    "repod.md",
+
+    # --- Git-related files ---
+    ".git/*",
+    ".gitignore",
+
+    # --- OS-specific metadata ---
+    ".DS_Store",
+    "Thumbs.db",
+    "Desktop.ini",
+
+    # --- IDE/editor settings ---
+    ".idea/*",
+    ".vscode/*",
+    ".project",
+    ".classpath",
+    ".settings/*",
+
+    # --- Python-related caches/build artifacts ---
+    ".tox/*",
+    "*.pyc",
+    "__pycache__/*",
+    ".mypy_cache/*",
+    ".ruff_cache/*",
+    "*.whl",
+    ".env*",   # May contain sensitive information
+    ".venv/*", # Python virtual environment
+
+    # --- Archives ---
+    "*.tar",
+    "*.tar.gz",
+
+    # --- Media files (images) ---
+    "*.png",
+    "*.jpeg",
+    "*.jpg",
+
+    # --- Log files, binaries, lock files ---
+    "*.log",
+    "*bin/*",
+    "*.lock",
+
+    # --- Node.js dependencies ---
+    "*/node_modules/*",
     ]
 
     def __init__(self, config: DumperConfig):
@@ -321,7 +473,7 @@ class RepositoryDumper:
             return []
 
         try:
-            with open(self.config.ignore_file, "r") as f:
+            with open(self.config.ignore_file, "r", encoding=self.config.encoding, errors="ignore") as f:
                 return [
                     line.strip()
                     for line in f
@@ -376,7 +528,7 @@ class RepositoryDumper:
         preamble = self.config.default_preamble
         if self.config.preamble_file:
             try:
-                with open(self.config.preamble_file, "r") as pf:
+                with open(self.config.preamble_file, "r", encoding=self.config.encoding, errors="ignore") as pf:
                     preamble = pf.read().strip()
             except Exception as e:
                 logger.error(f"Error reading preamble file: {e}")
@@ -397,7 +549,7 @@ class RepositoryDumper:
             if self._should_ignore(str(relative_path)):
                 return
 
-            with open(file_path, "r", errors="ignore") as f:
+            with open(file_path, "r", encoding=self.config.encoding, errors="ignore") as f:
                 content = f.read()
                 lang = self._get_file_language(file_path)
                 output_file.write(f"### {relative_path}\n\n")
@@ -440,77 +592,17 @@ class RepositoryDumper:
 
 ```
 
-### src/repod/cli.py
+### src\repod\py.typed
+
+```
+
+```
+
+### src\repod\__init__.py
 
 ```python
-import click
-from pathlib import Path
-from .core import DumperConfig, RepositoryDumper
-from rich.console import Console
-
-console = Console()
-
-
-@click.command()
-@click.argument(
-    "repo_path",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
-    default=".",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.Path(dir_okay=False, path_type=Path),
-    default="repod.md",
-    help="Output file path (default: repod.md)",
-)
-@click.option(
-    "-i",
-    "--ignore-file",
-    type=click.Path(exists=False, dir_okay=False, path_type=Path),
-    default=".rpdignore",
-    help="Path to ignore file (default: .rpdignore)",
-)
-@click.option(
-    "-p",
-    "--preamble",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Path to preamble file",
-)
-@click.option("--no-tree", is_flag=True, help="Disable tree structure in output")
-def main(
-    repo_path: Path,
-    output: Path,
-    ignore_file: Path,
-    preamble: Path,
-    no_tree: bool,
-) -> None:
-    """Repod: Dump repository contents to single markdown file."""
-    try:
-        config = DumperConfig(
-            repo_path=repo_path,
-            output_path=output,
-            ignore_file=ignore_file,
-            preamble_file=preamble,
-            include_tree=not no_tree,
-        )
-
-        dumper = RepositoryDumper(config)
-        dumper.dump()
-
-    except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        raise click.Abort()
-
-
-if __name__ == "__main__":
-    main()
-
-```
-
-### src/repod/py.typed
-
-```
+def hello() -> str:
+    return "Hello from repod!"
 
 ```
 
